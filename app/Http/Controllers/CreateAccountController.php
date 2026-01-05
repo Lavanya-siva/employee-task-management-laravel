@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\OtpVerification;
 use Illuminate\Validation\ValidationException;
 use App\Jobs\SendOtpJob;
+use Illuminate\Support\Facades\Log;
+
 
 class CreateAccountController extends Controller
 {
@@ -26,6 +27,9 @@ class CreateAccountController extends Controller
         'terms_cond' => 'required|in:1',
     ]);
     } catch(ValidationException $e){
+        Log::warning('Validation failed during account creation', [
+            'error' => $e->getMessage()
+        ]);
        return response()->json([
         'success' => false,
         'errors' => $e->errors()

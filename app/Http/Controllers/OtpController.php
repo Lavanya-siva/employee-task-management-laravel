@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Jobs\SendOtpJob;
-
+use Illuminate\Support\Facades\Log;
 
 
 class OtpController extends Controller{
@@ -16,16 +16,33 @@ class OtpController extends Controller{
     public function verifyOtp(Request $request){
     try{
         $request->validate([
+        'email' => 'required|email',
         'otp_code' => 'required|digits:6',
     ]);
     } catch(ValidationException $e){
+         Log::notice('Validation failed while Verifying OTP', [
+        'email' => $request->email,
+        'errors' => $e->errors()
+        ]);
      return response()->json([
         'success' => false,
         'errors' => $e->errors()
     ], 422);
     }
     $user = User::where('email', $request->email)->first(); // get user details by email 
-     //already verified
+    //no user found
+    if (!$user) {
+        Log::warning('OTP verification for non-existing user', [
+            'email' => $request->email
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found'
+        ], 404);
+    }
+
+    //already verified
         if ($user->registration_status === 'otp_verified') {
             return response()->json([
                 'message' => 'OTP already verified'
@@ -45,6 +62,9 @@ class OtpController extends Controller{
 
     // Check max attempts
     if ($otpRecord->attempts >= $maxChance) {
+         Log::warning('Max OTP attempts reached', [
+            'user_id' => $user->id
+        ]);
         return response()->json([
             'success' => false,
             'message' => 'Too many attempts. Please try again later.'
@@ -53,12 +73,18 @@ class OtpController extends Controller{
 
     // Check expiration
     if ($otpRecord->expires_at < now()) {
+        Log::info('OTP expired', [
+            'user_id' => $user->id
+        ]);
         return response()->json(['message' => 'OTP expired'], 422);
     }
 
     // Check OTP
     if ($otpRecord->otp_code != $request->otp_code) {
         $otpRecord->increment('attempts'); // increment attempts on wrong OTP
+        Log::notice('Invalid OTP entered', [
+            'user_id' => $user->id
+        ]);
         return response()->json(['message' => 'Invalid OTP'], 422);
     }
 
@@ -68,7 +94,12 @@ class OtpController extends Controller{
 
     $otpRecord->user->registration_status = 'otp_verified';
     $otpRecord->user->save();
+    
 
+    Log::info('OTP verified successfully', [
+        'user_id' => $user->id
+    ]);
+    
     return response()->json([
         'success' => true,
         'message' => 'OTP verified successfully'
@@ -83,6 +114,10 @@ class OtpController extends Controller{
             'password' => 'required|string'
         ]);
         } catch(ValidationException $e){
+         Log::notice('Validation failed while resending OTP', [
+        'email' => $request->email,
+        'errors' => $e->errors()
+        ]);
         return response()->json([
         'success' => false,
         'errors' => $e->errors()

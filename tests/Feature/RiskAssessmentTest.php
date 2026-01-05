@@ -33,7 +33,7 @@ public function authenticated_user_can_submit_risk_answer()
     $this->seed(\Database\Seeders\RiskQuestionSeeder::class);
 
     $user = User::factory()->create([
-        'registration_status' => 'personal_info' // 👈 REQUIRED
+       'registration_status' => 'documents_uploaded'
     ]);
 
     Sanctum::actingAs($user);
@@ -47,5 +47,56 @@ public function authenticated_user_can_submit_risk_answer()
             'success' => true
         ]);
 }
+ /** @test */
+    public function risk_answer_submission_fails_with_invalid_data()
+    {
+        $user = User::factory()->create([
+              'registration_status' => 'documents_uploaded'
+        ]);
 
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/user/risk-answer', [
+            // missing question_id & option_selected
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJson([
+                     'success' => false
+                 ]);
+    }
+  /** @test */
+    public function risk_answer_submission_fails_with_incorrect_data()
+    {
+        $user = User::factory()->create([ 'registration_status' => 'documents_uploaded']);
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/user/risk-answer', [
+            'question_id' => 9999,    // question does not exist
+            'option_selected' => 99   // invalid option
+        ]);
+
+        $response->assertStatus(422)
+                 ->assertJson(['success' => false]);
+    }
+     /** @test */
+    public function cannot_submit_risk_answer_if_registration_status_invalid()
+    {
+        $user = User::factory()->create([
+            'registration_status' => 'started' // invalid stage
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/user/risk-answer', [
+            'question_id' => 1,
+            'option_selected' => 1
+        ]);
+
+        $response->assertStatus(403) // Forbidden
+                 ->assertJson([
+                     'success' => false,
+                     'message' => 'Access denied. Document not uploaded yet.'
+                 ]);
+    }
 }
