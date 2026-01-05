@@ -21,6 +21,7 @@ return new class extends Migration {
                 'otp_verified',
                 'personal_info',
                 'documents_uploaded',
+                'documents_reuploaded',
                 'risk_done',
                 'completed'
             ])->default('started');

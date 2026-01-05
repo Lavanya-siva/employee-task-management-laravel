@@ -8,25 +8,33 @@ use Carbon\Carbon;
 
 class CheckSanctumTokenExpiry
 {
-    public function handle(Request $request, Closure $next)
-    {
-        $user = $request->user();
-        $token = $user->currentAccessToken(); // fetch from author bearer then check in personal token db
+public function handle(Request $request, Closure $next){
 
-        // If no token 
-        if (! $token) {
-            return response()->json(['message' => 'Invalid Token'], 401);
-        }
+$user = $request->user('sanctum'); // after auth:sanctum
 
-        // Check DB-based expiry
-        if ($token->expires_at && now()->greaterThan($token->expires_at)) {
-            $token->delete(); // delete expired token
+if (!$user) {
+    return response()->json([
+        'message' => 'Unauthenticated!!'
+    ], 401);
+}
 
-            return response()->json([
-                'message' => 'Token expired'
-            ], 401);
-        }
+$token = $user->currentAccessToken();
 
-        return $next($request);
+if (!$token) {
+    return response()->json([
+        'message' => 'Invalid Token'
+    ], 401);
+}
+
+if ($token->expires_at && now()->greaterThan($token->expires_at)) {
+    $token->delete();
+
+    return response()->json([
+        'message' => 'Token expired'
+    ], 401);
+}
+
+return $next($request);
+
     }
 }

@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 class Authenticate
 {
-    public function handle(Request $request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next)
     { 
-        if (!$request->user()) {
+    $user = $request->user('sanctum');
+        if (!$user) {
             return response()->json(['message' => 'Unauthenticated!!'], 401);
         }
-    
-        return $next($request);
-    }
+         return $next($request);
+}
 }

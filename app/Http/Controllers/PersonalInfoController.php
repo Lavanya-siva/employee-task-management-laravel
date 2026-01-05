@@ -15,7 +15,7 @@ class PersonalInfoController extends Controller
     public function savePersonalInfo(Request $request)
     {     
       
-        $user = $request->user(); 
+        $user = $request->user('sanctum');
         /* if (Gate::denies('valid-proof-type', $request->proof_type)) {
             return response()->json([
                 'success' => false,
@@ -40,7 +40,6 @@ class PersonalInfoController extends Controller
             'errors' => $e->errors()
             ], 422);
         }
-        $user = $request->user();
         $personalInfo = PersonalInfo::create([
             'user_id' => $user->id,
             'proof_type' => $request->proof_type,

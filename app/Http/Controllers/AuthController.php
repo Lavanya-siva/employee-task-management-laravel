@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Validation\ValidationException; 
+use App\Events\UserRegistered;
 
 class AuthController extends Controller
 {
@@ -38,7 +39,7 @@ class AuthController extends Controller
                 'message' => 'Please verify your OTP before logging in '
             ], 403);
         }
-
+        event(new UserRegistered($user));
        $token = $user->createToken('VukaAPI-login');
        $token->accessToken->expires_at = Carbon::now()->addMinutes(config('sanctum.expiration'));
        $token->accessToken->save();
