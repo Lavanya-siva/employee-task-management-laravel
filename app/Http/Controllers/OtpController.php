@@ -99,7 +99,7 @@ class OtpController extends Controller{
     Log::info('OTP verified successfully', [
         'user_id' => $user->id
     ]);
-    
+
     return response()->json([
         'success' => true,
         'message' => 'OTP verified successfully'
@@ -132,12 +132,12 @@ class OtpController extends Controller{
             ], 401);
         }
         //already verified
-        if ($user->registration_status === 'otp_verified') {
-            return response()->json([
-                'message' => 'OTP already verified'
-            ], 400);
-        }
-        
+       if ($user->registration_status !== 'started') {
+       return response()->json([
+        'message' => 'OTP already verified or cannot be resent at this stage'
+       ], 400);
+       }
+
         
         //generate new otp
         $otp = rand(100000, 999999);

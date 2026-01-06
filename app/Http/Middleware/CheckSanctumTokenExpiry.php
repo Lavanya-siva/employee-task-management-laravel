@@ -14,7 +14,7 @@ $user = $request->user('sanctum'); // after auth:sanctum
 
 if (!$user) {
     return response()->json([
-        'message' => 'Unauthenticated!!'
+        'message' => 'Unauthenticated!!!'
     ], 401);
 }
 

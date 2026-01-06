@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\PersonalInfo;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class PersonalInfoController extends Controller

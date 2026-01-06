@@ -19,12 +19,12 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-    } catch(ValidationException $e){
+        } catch(ValidationException $e){
 
-     Log::warning('Validation failed during login', [
-    'email' => $request->email,
-    'errors' => $e->errors()
-     ]);
+        Log::warning('Validation failed during login', [
+       'email' => $request->email,
+       'errors' => $e->errors()
+        ]);
 
         return response()->json([
         'success' => false,
@@ -64,7 +64,6 @@ class AuthController extends Controller
        $token = $user->createToken('VukaAPI-login');
        $token->accessToken->expires_at = Carbon::now()->addMinutes(config('sanctum.expiration'));
        $token->accessToken->save();
-
         return response()->json([
             'success' => true,
             'message' => 'Login successful, now add Personal Info',

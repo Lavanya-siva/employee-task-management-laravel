@@ -31,6 +31,7 @@ class DocumentController extends Controller
     // Upload two documents at a time
     public function upload(Request $request)
     {
+        
         $user = $request->user('sanctum');
 
         if ($user->registration_status !== 'personal_info') {
@@ -39,7 +40,7 @@ class DocumentController extends Controller
                 'message' => 'Document upload not allowed at this stage.'
             ], 403);
         }
-
+       
         // Validate two files
         $request->validate([
             'id_proof_name' => 'required|string|max:30',
