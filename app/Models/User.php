@@ -13,7 +13,8 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable, HasFactory, HasApiTokens;
     protected $fillable = [
-        'firstname','middlename','surname','email','password','phone_no','terms_cond','registration_status'
+        'firstname','middlename','surname','email','password','phone_no','terms_cond','registration_status', 'role',
+        'manager_id'
     ];
 
     public function otp()

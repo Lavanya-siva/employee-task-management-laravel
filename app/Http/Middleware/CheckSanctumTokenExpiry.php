@@ -12,12 +12,6 @@ public function handle(Request $request, Closure $next){
 
 $user = $request->user('sanctum'); // after auth:sanctum
 
-if (!$user) {
-    return response()->json([
-        'message' => 'Unauthenticated!!!'
-    ], 401);
-}
-
 $token = $user->currentAccessToken();
 
 if (!$token) {

@@ -7,17 +7,32 @@ use App\Http\Controllers\OtpController;
 use App\Http\Controllers\PersonalInfoController;
 use App\Http\Controllers\RiskAssessmentController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ManagerController;
 
+Route::post('/create-account', [CreateAccountController::class, 'createAccount']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
+Route::post('/resend-otp', [OtpController::class, 'resendOtp']);
 
-Route::prefix('user')->group(function () {
-    Route::post('create-account', [CreateAccountController::class, 'createAccount']);
-    Route::post('login', [AuthController::class, 'login']); 
-     Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
-    Route::post('resend-otp', [OtpController::class, 'resendOtp']);
-    
-});
 Route::prefix('user')->middleware(['auth:sanctum','sanctum.expiry', 'otp.verified'])->group(function () {
     Route::post('personal-info', [PersonalInfoController::class, 'savePersonalInfo']);
+});
+
+Route::middleware('auth:sanctum')
+    ->prefix('admin')
+    ->group(function () {
+        Route::post('/assign-manager', [AdminController::class, 'assignManagerToUser']);
+        Route::get('/users-personal-info', [AdminController::class, 'viewAllUsersWithPersonalInfo']);
+        Route::post('/set-document-status', [AdminController::class, 'setDocumentStatus']);
+        Route::get('/final-status/{user_id}', [AdminController::class, 'getUserFinalStatus']);
+    });
+
+Route::middleware('auth:sanctum')->prefix('manager')->group(function () {
+    Route::get('/users-personal-info', [
+        ManagerController::class,
+        'viewAssignedUsers'
+    ]);
 });
 
 
@@ -29,3 +44,4 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::post('/documents-upload', [DocumentController::class, 'upload'])->name('documents.upload');
     Route::post('/documents-reupload', [DocumentController::class, 'reupload'])->name('documents.reupload');
 });
+

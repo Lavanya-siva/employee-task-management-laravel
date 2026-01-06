@@ -25,6 +25,7 @@ class CreateAccountController extends Controller
         'phone_no' => 'required|string',
         'password' => 'required|min:8',
         'terms_cond' => 'required|in:1',
+        'role'=>'required'
     ]);
     } catch(ValidationException $e){
         Log::warning('Validation failed during account creation', [
@@ -45,6 +46,7 @@ class CreateAccountController extends Controller
         'phone_no' => $request->phone_no,
         'password' => Hash::make($request->password),
         'terms_cond' => $request->terms_cond,
+        'role'=>$request->role,
     ]);
     $otp = rand(100000, 999999);
 
