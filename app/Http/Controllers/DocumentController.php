@@ -139,11 +139,11 @@ class DocumentController extends Controller
 
             $file = $fileData['file'];
             $fileName = time().'_'.$file->getClientOriginalName();
-            $filePath = $file->storeAs('documents', $fileName, 'public');
+            $filePath = $file->storeAs('documents', $fileName, 'private');
 
             if ($existingDoc) {
-                if (Storage::disk('public')->exists($existingDoc->file_path)) {
-                    Storage::disk('public')->delete($existingDoc->file_path);
+                if (Storage::disk('private')->exists($existingDoc->file_path)) {
+                    Storage::disk('private')->delete($existingDoc->file_path);
                 }
                 $existingDoc->update([
                     'document_name' => $fileData['name'],

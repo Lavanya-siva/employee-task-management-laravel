@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\User;
-use App\Mail\WeeklyCustomerReportMail;
-use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendWeeklyCustomerReportJob;
 
 class SendWeeklyCustomerReport extends Command
 {
@@ -17,19 +16,10 @@ class SendWeeklyCustomerReport extends Command
         $managers = User::where('role', 'manager')->get();
 
         foreach ($managers as $manager) {
-
-            $customers = User::where('role', 'user')
-                ->where('manager_id', $manager->id)
-                ->whereBetween('created_at', [
-                    now()->subWeek(),
-                    now()
-                ])
-                ->get();
-
-            Mail::to($manager->email)
-                ->send(new WeeklyCustomerReportMail($manager, $customers));
+            // dispatch job
+            SendWeeklyCustomerReportJob::dispatch($manager);
         }
 
-        $this->info('Weekly customer reports sent successfully.');
+        $this->info('Weekly customer report jobs dispatched successfully.');
     }
 }

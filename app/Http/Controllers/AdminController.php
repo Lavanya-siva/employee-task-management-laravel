@@ -75,8 +75,8 @@ class AdminController extends Controller
         ], 403);
     }
 
-        $users = User::with('personalInfo')->get();
-
+        $users = User::with('personalInfo')->where('role','user')->get();
+        // get only user details
         return response()->json([
             'success' => true,
             'data' => $users

@@ -42,27 +42,21 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Hello {{ $manager->firstname }} {{ $manager->middlename }},</h2>
+<div class="container">
+    <h2>Hello {{ $manager->firstname }} {{ $manager->middlename }},</h2>
 
-        <p>Here is the list of newly added customers assigned to you this week:</p>
+    <p>Please find the attached CSV file containing the list of newly added customers assigned to you this week.</p>
 
-        @if($customers->isEmpty())
-            <p class="no-customers">No new customers this week.</p>
-        @else
-            <ul>
-                @foreach($customers as $customer)
-                    <li>
-                        {{ $customer->firstname }} {{$customer->middlename}} {{ $customer->surname }} – {{ $customer->email }}
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+    @if($customers->isEmpty())
+        <p class="no-customers">No new customers this week.</p>
+    @else
+        <p>Total new customers: <strong>{{ $customers->count() }}</strong></p>
+    @endif
 
-        <p class="footer">
-            Regards,<br>
-            Admin Team
-        </p>
-    </div>
+    <p class="footer">
+        Regards,<br>
+        Admin Team
+    </p>
+</div>
 </body>
 </html>

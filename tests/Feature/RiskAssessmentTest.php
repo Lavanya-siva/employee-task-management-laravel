@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\RiskQuestion;
 use Laravel\Sanctum\Sanctum;
-use Database\Seeders\RiskQuestionSeeder;
 
 
 class RiskAssessmentTest extends TestCase
