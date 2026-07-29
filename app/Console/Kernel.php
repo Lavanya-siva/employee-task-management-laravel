@@ -10,7 +10,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
 {
     $schedule->command('birthday:send-emails')
-             ->dailyAt('18:48')
+             ->dailyAt('00:00')
              ->withoutOverlapping()  // prevents duplicate runs
              ->runInBackground();    // optimization
 

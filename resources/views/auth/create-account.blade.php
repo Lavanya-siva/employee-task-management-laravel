@@ -1,95 +1,823 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; }
-        form { max-width: 500px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        form div { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="text"], input[type="email"], input[type="password"], select { width: 100%; padding: 8px 10px; border-radius: 5px; border: 1px solid #ccc; }
-        input[type="checkbox"] { margin-right: 5px; }
-        button { padding: 10px 15px; border: none; background-color: #007bff; color: #fff; border-radius: 5px; cursor: pointer; }
-        button:hover { background-color: #0069d9; }
-        .error { color: red; font-size: 0.9em; }
-        .success { color: green; text-align: center; margin-bottom: 15px; }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Create Account</title>
+
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+
+body{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:20px;
+
+    background:
+    linear-gradient(135deg,#667eea,#764ba2);
+
+    overflow-x:hidden;
+
+}
+
+
+
+/* Animated background circles */
+
+body::before,
+body::after{
+
+    content:"";
+
+    position:absolute;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.15);
+
+    animation:float 6s infinite alternate;
+
+}
+
+
+body::before{
+
+    width:350px;
+
+    height:350px;
+
+    top:-120px;
+
+    left:-120px;
+
+}
+
+
+
+body::after{
+
+    width:250px;
+
+    height:250px;
+
+    bottom:-80px;
+
+    right:-80px;
+
+}
+
+
+
+.container{
+
+    width:100%;
+
+    max-width:520px;
+
+    position:relative;
+
+    z-index:1;
+
+    animation:slide .8s ease;
+
+}
+
+
+
+.card{
+
+
+    background:rgba(255,255,255,.95);
+
+
+    padding:35px;
+
+
+    border-radius:25px;
+
+
+    box-shadow:
+
+    0 20px 40px rgba(0,0,0,.25);
+
+
+}
+
+
+
+
+.title{
+
+    text-align:center;
+
+    margin-bottom:30px;
+
+}
+
+
+
+.title h2{
+
+    font-size:32px;
+
+    color:#333;
+
+}
+
+
+.title p{
+
+    color:#777;
+
+    margin-top:8px;
+
+}
+
+
+
+.banner{
+
+    padding:12px 15px;
+
+    border-radius:10px;
+
+    margin-bottom:20px;
+
+    font-size:14px;
+
+}
+
+
+.banner.error-banner{
+
+    background:#fdecea;
+
+    color:#e63946;
+
+    border:1px solid #f5c2c7;
+
+}
+
+
+.banner.success-banner{
+
+    background:#e6f7ee;
+
+    color:#1a7f4e;
+
+    border:1px solid #b9e6cd;
+
+}
+
+
+
+
+.form-group{
+
+    position:relative;
+
+    margin-top:8px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+
+
+.form-group input,
+.form-group select{
+
+
+    width:100%;
+
+
+    padding:14px 15px;
+
+
+    border:none;
+
+
+    outline:none;
+
+
+    border-radius:12px;
+
+
+    background:#f1f3f6;
+
+
+    font-size:15px;
+
+
+    transition:.3s;
+
+}
+
+
+
+.form-group input:focus,
+.form-group select:focus{
+
+
+    background:white;
+
+
+    box-shadow:
+
+    0 0 0 2px #667eea;
+
+
+}
+
+
+
+
+.form-group label{
+
+
+    position:absolute;
+
+
+    left:15px;
+
+
+    top:14px;
+
+
+    color:#777;
+
+
+    pointer-events:none;
+
+
+    transition:.2s ease all;
+
+
+    background:transparent;
+
+
+    padding:0 4px;
+
+}
+
+
+
+
+/* Float the label up and shrink it when focused OR when the field has a valid value */
+
+.form-group input:focus + label,
+.form-group input:valid + label,
+.form-group select:focus + label,
+.form-group select:valid + label{
+
+
+    text-align: center;
+
+    font-size:15px;
+
+    color:#777;
+
+    font-family: 'Segoe UI', sans-serif;
+
+}
+
+
+/* Autofilled fields (Chrome) don't always trigger :valid the same way, so cover them too */
+
+.form-group input:-webkit-autofill + label{
+
+    top:-10px;
+
+    left:12px;
+
+    font-size:12px;
+
+    color:#667eea;
+
+    background:#fff;
+
+}
+
+
+
+
+.form-group select{
+
+
+    cursor:pointer;
+
+}
+
+
+
+.error{
+
+
+    display:block;
+
+    margin-top:5px;
+
+    color:#e63946;
+
+    font-size:13px;
+
+}
+
+
+
+
+.checkbox{
+
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-bottom:25px;
+
+    font-size:14px;
+
+    color:#555;
+
+}
+
+
+
+.checkbox input{
+
+    width:16px;
+
+    height:16px;
+
+}
+
+
+
+.checkbox a{
+
+    color:#667eea;
+
+    text-decoration:none;
+
+}
+
+
+
+
+
+button{
+
+
+    width:100%;
+
+
+    padding:14px;
+
+
+    border:none;
+
+
+    border-radius:30px;
+
+
+    background:
+
+    linear-gradient(135deg,#667eea,#764ba2);
+
+
+    color:white;
+
+
+    font-size:17px;
+
+
+    cursor:pointer;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+button:hover{
+
+
+    transform:translateY(-3px);
+
+
+    box-shadow:
+
+    0 10px 25px rgba(102,126,234,.5);
+
+
+}
+
+
+
+.back-to-login{
+
+    text-align:center;
+
+    margin-top:22px;
+
+    font-size:14px;
+
+    color:#555;
+
+}
+
+
+.back-to-login a{
+
+    color:#667eea;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}
+
+
+.back-to-login a:hover{
+
+    text-decoration:underline;
+
+}
+
+
+
+
+@keyframes slide{
+
+
+from{
+
+    opacity:0;
+
+    transform:translateY(-50px);
+
+}
+
+
+to{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+}
+
+}
+
+
+
+@keyframes float{
+
+
+from{
+
+    transform:translateY(0);
+
+}
+
+
+to{
+
+    transform:translateY(50px);
+
+}
+
+}
+
+
+
+
+@media(max-width:600px){
+
+
+.card{
+
+    padding:25px;
+
+}
+
+
+.title h2{
+
+    font-size:26px;
+
+}
+
+
+}
+
+
+</style>
+
+
 </head>
+
+
+
 <body>
 
-<h2 style="text-align:center;">Create Account</h2>
 
-@if(session('success'))
-    <div class="success">{{ session('success') }}</div>
+<div class="container">
+
+
+<div class="card">
+
+
+<div class="title">
+
+<h2>Create Account</h2>
+
+<p>Create your account and get started</p>
+
+</div>
+
+
+
+{{-- General (non-field-specific) failure/success banners --}}
+
+@if(session('failure'))
+<div class="banner error-banner">
+{{ session('failure') }}
+</div>
 @endif
 
-<form method="POST" action="/user/create-account">
-    @csrf
-    <!-- OR explicit hidden CSRF input -->
-    <!-- <input type="hidden" name="_token" value="{{ csrf_token() }}"> -->
+@if(session('success'))
+<div class="banner success-banner">
+{{ session('success') }}
+</div>
+@endif
 
-    <!-- Name -->
-    <div>
-        <label for="name">Name</label>
-        <input type="text" name="name" id="name" placeholder="Enter your name" value="{{ old('name') }}" required>
-        @error('name')<span class="error">{{ $message }}</span>@enderror
-    </div>
 
-    <!-- Email -->
-    <div>
-        <label for="email">Email</label>
-        <input type="email" name="email" id="email" placeholder="Enter your email" value="{{ old('email') }}" required>
-        @error('email')<span class="error">{{ $message }}</span>@enderror
-    </div>
 
-    <!-- Password -->
-    <div>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" placeholder="Enter password" required>
-        @error('password')<span class="error">{{ $message }}</span>@enderror
-    </div>
 
-    <!-- Confirm Password -->
-    <div>
-        <label for="password_confirmation">Confirm Password</label>
-        <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm password" required>
-    </div>
+<form method="POST" action="/api/create-account">
 
-    <!-- Mobile Number -->
-    <div>
-        <label for="mobile">Mobile Number</label>
-        <input type="text" name="mobile" id="mobile" placeholder="Enter your mobile number" value="{{ old('mobile') }}">
-        @error('mobile')<span class="error">{{ $message }}</span>@enderror
-    </div>
+@csrf
 
-    <!-- Gender -->
-    <div>
-        <label for="gender">Gender</label>
-        <select name="gender" id="gender">
-            <option value="">Select Gender</option>
-            <option value="male" {{ old('gender')=='male'?'selected':'' }}>Male</option>
-            <option value="female" {{ old('gender')=='female'?'selected':'' }}>Female</option>
-            <option value="other" {{ old('gender')=='other'?'selected':'' }}>Other</option>
-        </select>
-        @error('gender')<span class="error">{{ $message }}</span>@enderror
-    </div>
 
-    <!-- Terms & Conditions -->
-    <div>
-        <input type="checkbox" name="terms" id="terms" required {{ old('terms') ? 'checked' : '' }}>
-        <label for="terms">I agree to the <a href="#">Terms & Conditions</a></label>
-        @error('terms')<span class="error">{{ $message }}</span>@enderror
-    </div>
 
-    <!-- Submit -->
-    <div style="text-align:center;">
-        <button type="submit">Create Account</button>
-    </div>
+<div class="form-group">
+
+<input
+type="text"
+id="firstname"
+name="firstname"
+value="{{ old('firstname') }}"
+required>
+
+<label for="firstname">First Name</label>
+
+@error('firstname')
+<span class="error">{{$message}}</span>
+@enderror
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<input
+type="text"
+id="middlename"
+name="middlename"
+value="{{ old('middlename') }}">
+
+<label for="middlename">Middle Name</label>
+
+@error('middlename')
+<span class="error">{{$message}}</span>
+@enderror
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<input
+type="text"
+id="surname"
+name="surname"
+value="{{ old('surname') }}"
+required>
+
+<label for="surname">Surname</label>
+
+@error('surname')
+<span class="error">{{$message}}</span>
+@enderror
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<input
+type="email"
+id="email"
+name="email"
+value="{{ old('email') }}"
+required>
+
+<label for="email">Email</label>
+
+@error('email')
+<span class="error">{{$message}}</span>
+@enderror
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<input
+type="text"
+id="phone_no"
+name="phone_no"
+value="{{ old('phone_no') }}"
+required>
+
+<label for="phone_no">Phone Number</label>
+
+@error('phone_no')
+<span class="error">{{$message}}</span>
+@enderror
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<input
+type="password"
+id="password"
+name="password"
+required>
+
+<label for="password">Password</label>
+
+@error('password')
+<span class="error">{{$message}}</span>
+@enderror
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<input
+type="password"
+id="password_confirmation"
+name="password_confirmation"
+required>
+
+<label for="password_confirmation">Confirm Password</label>
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<select name="role" id="role" required>
+
+<option value="">
+Select Role
+</option>
+
+
+<option value="user"
+{{ old('role') == 'user' ? 'selected' : '' }}>
+User
+</option>
+
+
+<option value="manager"
+{{ old('role') == 'manager' ? 'selected' : '' }}>
+Manager
+</option>
+
+
+<option value="admin"
+{{ old('role') == 'admin' ? 'selected' : '' }}>
+Admin
+</option>
+
+
+</select>
+
+
+@error('role')
+
+<span class="error">
+{{ $message }}
+</span>
+
+@enderror
+
+
+</div>
+
+
+
+
+
+<div class="checkbox">
+
+
+<input
+type="checkbox"
+name="terms_cond"
+value="1"
+{{old('terms_cond')?'checked':''}}
+required>
+
+
+<span>
+I agree to Terms & Conditions
+</span>
+
+
+@error('terms_cond')
+<span class="error">{{$message}}</span>
+@enderror
+
+
+</div>
+
+
+
+
+<button type="submit">
+
+Create Account
+
+</button>
+
+
+
 </form>
 
-</body>
-</html>
 
+
+<div class="back-to-login">
+
+Already have an account?
+<a href="/login">Back to Login</a>
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+</body>
+
+</html>

@@ -31,10 +31,13 @@ class CreateAccountController extends Controller
         Log::warning('Validation failed during account creation', [
             'error' => $e->getMessage()
         ]);
-       return response()->json([
-        'success' => false,
-        'errors' => $e->errors()
-    ], 422);
+    //    return response()->json([
+    //     'success' => false,
+    //     'errors' => $e->errors()
+    // ], 422);
+    return redirect('/create-account')
+        ->withErrors($e->errors())   // <-- use withErrors, not ->with('failure', ...)
+        ->withInput(); 
     }
    
 
@@ -59,10 +62,12 @@ class CreateAccountController extends Controller
      
      SendOtpJob::dispatch($user, $otp);
    //Mail::to($user->email)->send(new OtpMail($user, $otp)); // send mail-Mail.php-view
-    return response()->json([
-        'success' => true,
-        'message' => 'Account created. Verification email with otp is being sent.',
-    ], 201);
+    // return response()->json([
+    //     'success' => true,
+    //     'message' => 'Account created. Verification email with otp is being sent.',
+    // ], 201);
+
+    return redirect('/otp-verify')->with('success', 'Account created. Verification email with OTP is being sent.');
 }
 
 }
