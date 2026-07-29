@@ -22,14 +22,47 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(OtpVerification::class, 'user_id');
     }
 
-    public function personalInfo()
-    {
-        return $this->hasOne(PersonalInfo::class, 'user_id');
-    }
+    // public function personalInfo()
+    // {
+    //     return $this->hasOne(PersonalInfo::class, 'user_id');
+    // }
     public function otpVerification()
     {
         return $this->hasOne(OtpVerification::class);
     }
+    public function manager()
+{
+    return $this->belongsTo(
+        User::class,
+        'manager_id'
+    );
+}
+public function tasks()
+{
+
+    return $this->hasMany(
+        Task::class,
+        'assigned_to'
+    );
+
+}
+public function attendances()
+{
+    return $this->hasMany(Attendance::class);
+}
+
+
+public function leaveRequests()
+{
+    return $this->hasMany(LeaveRequest::class);
+}
+
+public function personalInfo()
+{
+    return $this->hasOne(
+        UserPersonalInfo::class
+    );
+}
 }
 
 

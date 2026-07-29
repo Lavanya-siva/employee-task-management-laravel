@@ -11,7 +11,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ManagerController;
 
 Route::post('/create-account', [CreateAccountController::class, 'createAccount']);
-Route::post('/login', [AuthController::class, 'login']);
+
 Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
 Route::post('/resend-otp', [OtpController::class, 'resendOtp']);
 
@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->prefix('manager')->group(function () {
         ManagerController::class,
         'viewAssignedUsers'
     ]);
+
 });
 
 
@@ -44,4 +45,3 @@ Route::prefix('user')->middleware('auth:sanctum')->group(function () {
     Route::post('/documents-upload', [DocumentController::class, 'upload'])->name('documents.upload');
     Route::post('/documents-reupload', [DocumentController::class, 'reupload'])->name('documents.reupload');
 });
-

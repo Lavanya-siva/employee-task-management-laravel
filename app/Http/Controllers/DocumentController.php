@@ -43,15 +43,13 @@ class DocumentController extends Controller
        
         // Validate two files
         $request->validate([
-            'id_proof_name' => 'required|string|max:30',
             'id_proof_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'kra_pin_name' => 'required|string|max:30',
             'kra_pin_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
         $filesToUpload = [
-            ['category' => 'ID Proof', 'name' => $request->id_proof_name, 'file' => $request->file('id_proof_file')],
-            ['category' => 'KRA Pin', 'name' => $request->kra_pin_name, 'file' => $request->file('kra_pin_file')],
+            ['category' => 'ID Proof', 'file' => $request->file('id_proof_file')],
+            ['category' => 'KRA Pin', 'file' => $request->file('kra_pin_file')],
         ];
 
         $uploadedDocs = [];
@@ -72,7 +70,6 @@ class DocumentController extends Controller
                     Storage::disk('public')->delete($existingDoc->file_path);
                 }
                 $existingDoc->update([
-                    'document_name' => $fileData['name'],
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_path' => $filePath,
                     'current_status' => 'pending',
@@ -84,7 +81,6 @@ class DocumentController extends Controller
                 $doc = Document::create([
                     'users_id' => $user->id,
                     'document_category' => $fileData['category'],
-                    'document_name' => $fileData['name'],
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_path' => $filePath,
                     'current_status' => 'pending',
@@ -119,15 +115,13 @@ class DocumentController extends Controller
 
         // Same validation as upload
         $request->validate([
-            'id_proof_name' => 'required|string|max:30',
             'id_proof_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'kra_pin_name' => 'required|string|max:30',
             'kra_pin_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
         $filesToUpload = [
-            ['category' => 'ID Proof', 'name' => $request->id_proof_name, 'file' => $request->file('id_proof_file')],
-            ['category' => 'KRA Pin', 'name' => $request->kra_pin_name, 'file' => $request->file('kra_pin_file')],
+            ['category' => 'ID Proof', 'file' => $request->file('id_proof_file')],
+            ['category' => 'KRA Pin', 'file' => $request->file('kra_pin_file')],
         ];
 
         $uploadedDocs = [];
@@ -146,7 +140,6 @@ class DocumentController extends Controller
                     Storage::disk('private')->delete($existingDoc->file_path);
                 }
                 $existingDoc->update([
-                    'document_name' => $fileData['name'],
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_path' => $filePath,
                     'current_status' => 'pending',
@@ -157,7 +150,6 @@ class DocumentController extends Controller
                 $doc = Document::create([
                     'users_id' => $user->id,
                     'document_category' => $fileData['category'],
-                    'document_name' => $fileData['name'],
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_path' => $filePath,
                     'current_status' => 'pending',
@@ -176,4 +168,8 @@ class DocumentController extends Controller
             'data' => $uploadedDocs
         ]);
     }
+
+   public function uploadDoc(){
+    return view('auth.document');
+   }
 }

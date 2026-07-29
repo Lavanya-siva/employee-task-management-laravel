@@ -110,8 +110,7 @@ class OtpController extends Controller{
     {
         try{
             $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string'
+            'email' => 'required|email'
         ]);
         } catch(ValidationException $e){
          Log::notice('Validation failed while resending OTP', [
@@ -126,7 +125,7 @@ class OtpController extends Controller{
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user) {
             return response()->json([
                 'message' => 'Invalid Credentials'
             ], 401);
