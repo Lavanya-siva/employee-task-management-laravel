@@ -421,7 +421,9 @@ class="btn btn-secondary w-100">
 
 <th>Joined</th>
 
+@if(session('user_role') == 'admin')
 <th class="text-center">Actions</th>
+@endif
 
 </tr>
 
@@ -537,6 +539,7 @@ User
 </td>
 
 
+@if(session('user_role') == 'admin')
 <td class="text-center">
 
 <div class="d-flex justify-content-center gap-2">
@@ -564,6 +567,7 @@ User
 </div>
 
 </td>
+@endif
 
 
 </tr>
