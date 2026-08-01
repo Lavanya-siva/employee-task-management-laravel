@@ -3,110 +3,134 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use App\Models\User;
-use App\Models\Document;
-use Laravel\Sanctum\Sanctum;
 
 class AdminManagerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function unauthenticated_user_cannot_access_admin_routes()
+    #[Test]
+    public function guest_cannot_assign_manager()
     {
-        $this->postJson('/api/admin/assign-manager', [])
-            ->assertStatus(401);
-        $this->getJson('/api/admin/users-personal-info')
-            ->assertStatus(401);
-        $this->postJson('/api/admin/set-document-status', [])
-            ->assertStatus(401);
-        $this->getJson('/api/admin/final-status/1')
-            ->assertStatus(401);
-    }
-
-    /** @test */
-    public function admin_can_assign_manager_to_user()
-    {
-        $admin = User::factory()->create(['role' => 'admin']);
         $manager = User::factory()->create(['role' => 'manager']);
-        $user = User::factory()->create(['role' => 'user']);
+        $employee = User::factory()->create(['role' => 'user']);
 
-        Sanctum::actingAs($admin);
-
-        $response = $this->postJson('/api/admin/assign-manager', [
-            'user_id' => $user->id,
+        $response = $this->post('/manager-assignment', [
+            'user_id' => $employee->id,
             'manager_id' => $manager->id,
         ]);
 
-        $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                     'message' => 'Manager assigned to user successfully'
-                 ]);
+        $response->assertRedirect();
+        $response->assertSessionHas('error', 'Only admin can assign managers');
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'manager_id' => $manager->id
-        ]); // fail throw exception
+        $this->assertDatabaseMissing('users', [
+            'id' => $employee->id,
+            'manager_id' => $manager->id,
+        ]);
     }
 
-    /** @test */
-    public function admin_cannot_assign_manager_if_role_wrong()
+    #[Test]
+    public function non_admin_cannot_assign_manager()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $anotherAdmin = User::factory()->create(['role' => 'admin']);
+        /** @var \App\Models\User $user */
         $user = User::factory()->create(['role' => 'user']);
+        $manager = User::factory()->create(['role' => 'manager']);
+        $employee = User::factory()->create(['role' => 'user']);
 
-        Sanctum::actingAs($admin);
-
-        $response = $this->postJson('/api/admin/assign-manager', [
-            'user_id' => $user->id,
-            'manager_id' => $anotherAdmin->id,
+        $response = $this->actingAs($user)->post('/manager-assignment', [
+            'user_id' => $employee->id,
+            'manager_id' => $manager->id,
         ]);
 
-        $response->assertStatus(404)
-                 ->assertJson([
-                     'success' => false,
-                     'message' => 'Manager not found or not a manager.'
-                 ]);
+        $response->assertRedirect();
+        $response->assertSessionHas('error', 'Only admin can assign managers');
     }
 
-    /** @test */
-    public function manager_can_view_only_assigned_users()
+    #[Test]
+    public function admin_can_assign_manager_to_employee()
     {
-        $manager = User::factory()->create(['role' => 'manager']);
-        $user1 = User::factory()->create(['role' => 'user', 'manager_id' => $manager->id]);
-        $user2 = User::factory()->create(['role' => 'user', 'manager_id' => null]);
-
-        Sanctum::actingAs($manager);
-
-        $response = $this->getJson('/api/manager/users-personal-info');
-
-        $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data')
-                 ->assertJsonFragment([
-                     'id' => $user1->id
-                 ])
-                 ->assertJsonMissing([
-                     'id' => $user2->id
-                 ]);
-    }
-
-    /** @test */
-    public function cannot_assign_invalid_manager_or_user()
-    {
+        /** @var \App\Models\User $admin */
         $admin = User::factory()->create(['role' => 'admin']);
-        Sanctum::actingAs($admin);
-        $response = $this->postJson('/api/admin/assign-manager', [
-            'user_id' => 4,   
-            'manager_id' => 8888 
-        ]); // any one invalid
+        $manager = User::factory()->create(['role' => 'manager']);
+        $employee = User::factory()->create(['role' => 'user']);
 
-        $response->assertStatus(404)
-                 ->assertJson([
-                     'success' => false
-                 ]);
+        $response = $this->actingAs($admin)->post('/manager-assignment', [
+            'user_id' => $employee->id,
+            'manager_id' => $manager->id,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Manager assigned successfully');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $employee->id,
+            'manager_id' => $manager->id,
+        ]);
+    }
+
+    #[Test]
+    public function assignment_fails_when_manager_id_is_not_actually_a_manager()
+    {
+        /** @var \App\Models\User $admin */
+        $admin = User::factory()->create(['role' => 'admin']);
+        $notAManager = User::factory()->create(['role' => 'user']);
+        $employee = User::factory()->create(['role' => 'user']);
+
+        $response = $this->actingAs($admin)->post('/manager-assignment', [
+            'user_id' => $employee->id,
+            'manager_id' => $notAManager->id,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error', 'Selected user is not a manager');
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $employee->id,
+            'manager_id' => $notAManager->id,
+        ]);
+    }
+
+    #[Test]
+    public function assignment_fails_when_user_id_is_not_actually_an_employee()
+    {
+        /** @var \App\Models\User $admin */
+        $admin = User::factory()->create(['role' => 'admin']);
+        $manager = User::factory()->create(['role' => 'manager']);
+        $notAnEmployee = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post('/manager-assignment', [
+            'user_id' => $notAnEmployee->id,
+            'manager_id' => $manager->id,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error', 'Invalid employee selected');
+    }
+
+    #[Test]
+    public function assignment_fails_with_missing_fields()
+    {
+        /** @var \App\Models\User $admin */
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post('/manager-assignment', []);
+
+        $response->assertSessionHasErrors(['user_id', 'manager_id']);
+    }
+
+    #[Test]
+    public function assignment_fails_with_nonexistent_ids()
+    {
+        /** @var \App\Models\User $admin */
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post('/manager-assignment', [
+            'user_id' => 99999,
+            'manager_id' => 88888,
+        ]);
+
+        $response->assertSessionHasErrors(['user_id', 'manager_id']);
     }
 }
-// csv  deployment cache
