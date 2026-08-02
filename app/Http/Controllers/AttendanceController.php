@@ -76,12 +76,29 @@ class AttendanceController extends Controller
         }
 
 
+        $checkOutTime = Carbon::now();
+
+        $checkInTime = Carbon::parse(
+            $attendance->date->format('Y-m-d').' '.$attendance->check_in
+        );
+
+        $hoursWorked = $checkInTime->diffInMinutes($checkOutTime) / 60;
+
+        $status = $hoursWorked >= 8 ? 'Present' : 'Absent';
+
+
         $attendance->update([
-            'check_out' => Carbon::now()->format('H:i:s')
+            'check_out' => $checkOutTime->format('H:i:s'),
+            'status'    => $status
         ]);
 
 
-        return back()->with('success', 'Check-out successful.');
+        $message = $status === 'Present'
+            ? 'Check-out successful. You worked '.round($hoursWorked, 2).' hours — marked Present.'
+            : 'Check-out successful. You worked '.round($hoursWorked, 2).' hours (under 8) — marked Absent.';
+
+
+        return back()->with('success', $message);
     }
 
 }

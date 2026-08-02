@@ -47,9 +47,38 @@ Check Out
 <div class="card-body">
 
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+{{ session('success') }}
+<button type="button" class="btn-close" onclick="this.closest('.alert').remove()" aria-label="Close"></button>
+</div>
+@endif
+
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+{{ session('error') }}
+<button type="button" class="btn-close" onclick="this.closest('.alert').remove()" aria-label="Close"></button>
+</div>
+@endif
+
+
 {{-- Today's Attendance --}}
 
 @if(isset($todayAttendance))
+
+@php
+$computedStatus = 'Not Marked';
+$hoursWorked = null;
+
+if($todayAttendance->check_in && $todayAttendance->check_out){
+    $checkIn = \Carbon\Carbon::parse($todayAttendance->check_in);
+    $checkOut = \Carbon\Carbon::parse($todayAttendance->check_out);
+    $hoursWorked = $checkIn->diffInMinutes($checkOut) / 60;
+
+    $computedStatus = $hoursWorked >= 8 ? 'Present' : 'Absent';
+}
+@endphp
 
 <div class="alert alert-info">
 
@@ -68,9 +97,26 @@ Check Out:
 <br>
 
 Status:
-{{ $todayAttendance->status ?? 'Not Marked' }}
+{{ $computedStatus }}
 
 </div>
+
+
+@if($todayAttendance->check_out && $hoursWorked !== null)
+
+    @if($hoursWorked >= 8)
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    You worked {{ round($hoursWorked,2) }} hours today — marked as <strong>Present</strong>.
+    <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
+    </div>
+    @else
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    You only worked {{ round($hoursWorked,2) }} hours today (under 8) — marked as <strong>Absent</strong>.
+    <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
+    </div>
+    @endif
+
+@endif
 
 @endif
 

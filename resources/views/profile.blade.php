@@ -214,7 +214,7 @@ type="text"
 name="phone"
 class="form-control"
 
-value="{{ $personalInfo->phone ?? '' }}">
+value="{{ $user->phone_no }}">
 
 
 </div>

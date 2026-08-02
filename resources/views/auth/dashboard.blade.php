@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Employee Management System</title>
-
+<link rel="icon" type="image/ico" href="{{ asset('favicon.ico') }}">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -240,6 +240,7 @@ Tasks
 
 
 
+@if(session('user_role') !== 'admin')
 <a href="{{route('attendance.index')}}">
 
 <i class="bi bi-calendar-check me-2"></i>
@@ -247,6 +248,7 @@ Tasks
 My Attendance
 
 </a>
+@endif
 
 
 
@@ -593,16 +595,17 @@ style="width:90%">
 <h6 class="mb-1">
 
 {{ $employee->firstname }}
-
+@if($employee->middlename) {{ $employee->middlename }} @endif
 {{ $employee->surname }}
 
 </h6>
 
-
 <small class="text-muted">
-
-{{ ucfirst($employee->role) }}
-
+    @if($employee->role == 'user')
+        Member
+    @else
+        {{ ucfirst($employee->role) }}
+    @endif
 </small>
 
 
@@ -804,7 +807,7 @@ greeting="Good Evening  {{ session('user_name') }}!";
 
 else{
 
-greeting="Good Night  {{ session('user_name') }}!";
+greeting="Night Owl {{ session('user_name') }}!";
 
 }
 
