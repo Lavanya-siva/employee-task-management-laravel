@@ -220,7 +220,7 @@ Action
 <td>
 
 {{ $leave->user->firstname }}
-
+@if($leave->user->middlename){{$leave->user->middlename}} @endif
 {{ $leave->user->surname }}
 
 </td>

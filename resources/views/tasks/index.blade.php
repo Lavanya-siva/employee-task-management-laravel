@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Task Management</title>
-
+<link rel="icon" type="image/ico" href="{{ asset('favicon.ico') }}">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -313,11 +313,15 @@ Manager
 
 
 
- <a href="{{ route('attendance.index') }}" class="nav-link">
-        <i class="bi bi-calendar-check"></i>
-        My Attendance
-    </a>
+@if(session('user_role') !== 'admin')
+<a href="{{route('attendance.index')}}">
 
+<i class="bi bi-calendar-check me-2"></i>
+
+My Attendance
+
+</a>
+@endif
 
 
     <a href="{{ route('leave-requests.index') }}" class="nav-link">
@@ -515,7 +519,7 @@ Select Employee
 
 
 {{$employee->firstname}}
-
+@if($employee->middlename){{$employee->middlename}} @endif
 {{$employee->surname}}
 
 
@@ -800,7 +804,7 @@ Update
 
 
 {{$task->employee->firstname}}
-
+@if($task->employee->middlename){{$task->employee->middlename}} @endif
 {{$task->employee->surname}}
 
 
@@ -818,7 +822,7 @@ Not Assigned
 @if($task->creator)
 
 {{$task->creator->firstname}}
-
+@if($task->creator->middlename){{$task->creator->middlename}} @endif
 {{$task->creator->surname}}
 
 @else

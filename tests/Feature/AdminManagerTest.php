@@ -11,6 +11,17 @@ class AdminManagerTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function asUser(User $user): self
+    {
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $this->withSession([
+            'access_token' => $token,
+        ]);
+
+        return $this;
+    }
+
     #[Test]
     public function guest_cannot_assign_manager()
     {
@@ -23,7 +34,7 @@ class AdminManagerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('error', 'Only admin can assign managers');
+        $response->assertSessionHas('error', 'Please login to continue.');
 
         $this->assertDatabaseMissing('users', [
             'id' => $employee->id,
@@ -34,12 +45,11 @@ class AdminManagerTest extends TestCase
     #[Test]
     public function non_admin_cannot_assign_manager()
     {
-        /** @var \App\Models\User $user */
         $user = User::factory()->create(['role' => 'user']);
         $manager = User::factory()->create(['role' => 'manager']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->actingAs($user)->post('/manager-assignment', [
+        $response = $this->asUser($user)->post('/manager-assignment', [
             'user_id' => $employee->id,
             'manager_id' => $manager->id,
         ]);
@@ -51,12 +61,11 @@ class AdminManagerTest extends TestCase
     #[Test]
     public function admin_can_assign_manager_to_employee()
     {
-        /** @var \App\Models\User $admin */
         $admin = User::factory()->create(['role' => 'admin']);
         $manager = User::factory()->create(['role' => 'manager']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->actingAs($admin)->post('/manager-assignment', [
+        $response = $this->asUser($admin)->post('/manager-assignment', [
             'user_id' => $employee->id,
             'manager_id' => $manager->id,
         ]);
@@ -73,12 +82,11 @@ class AdminManagerTest extends TestCase
     #[Test]
     public function assignment_fails_when_manager_id_is_not_actually_a_manager()
     {
-        /** @var \App\Models\User $admin */
         $admin = User::factory()->create(['role' => 'admin']);
         $notAManager = User::factory()->create(['role' => 'user']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->actingAs($admin)->post('/manager-assignment', [
+        $response = $this->asUser($admin)->post('/manager-assignment', [
             'user_id' => $employee->id,
             'manager_id' => $notAManager->id,
         ]);
@@ -95,12 +103,11 @@ class AdminManagerTest extends TestCase
     #[Test]
     public function assignment_fails_when_user_id_is_not_actually_an_employee()
     {
-        /** @var \App\Models\User $admin */
         $admin = User::factory()->create(['role' => 'admin']);
         $manager = User::factory()->create(['role' => 'manager']);
         $notAnEmployee = User::factory()->create(['role' => 'admin']);
 
-        $response = $this->actingAs($admin)->post('/manager-assignment', [
+        $response = $this->asUser($admin)->post('/manager-assignment', [
             'user_id' => $notAnEmployee->id,
             'manager_id' => $manager->id,
         ]);
@@ -112,10 +119,9 @@ class AdminManagerTest extends TestCase
     #[Test]
     public function assignment_fails_with_missing_fields()
     {
-        /** @var \App\Models\User $admin */
         $admin = User::factory()->create(['role' => 'admin']);
 
-        $response = $this->actingAs($admin)->post('/manager-assignment', []);
+        $response = $this->asUser($admin)->post('/manager-assignment', []);
 
         $response->assertSessionHasErrors(['user_id', 'manager_id']);
     }
@@ -123,10 +129,9 @@ class AdminManagerTest extends TestCase
     #[Test]
     public function assignment_fails_with_nonexistent_ids()
     {
-        /** @var \App\Models\User $admin */
         $admin = User::factory()->create(['role' => 'admin']);
 
-        $response = $this->actingAs($admin)->post('/manager-assignment', [
+        $response = $this->asUser($admin)->post('/manager-assignment', [
             'user_id' => 99999,
             'manager_id' => 88888,
         ]);

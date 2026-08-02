@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Manager </title>
-
+<link rel="icon" type="image/ico" href="{{ asset('favicon.ico') }}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -169,10 +169,15 @@ Tasks
 
 
 
- <a href="{{ route('attendance.index') }}" class="nav-link">
-        <i class="bi bi-calendar-check"></i>
-        My Attendance
-    </a>
+@if(session('user_role') !== 'admin')
+<a href="{{route('attendance.index')}}">
+
+<i class="bi bi-calendar-check me-2"></i>
+
+My Attendance
+
+</a>
+@endif
 
 
 
@@ -338,7 +343,7 @@ Assign Manager
 <strong>
 
 {{ $employee->firstname }}
-
+@if($employee->middlename){{$employee->middlename}} @endif
 {{ $employee->surname }}
 
 </strong>
@@ -370,7 +375,7 @@ Assign Manager
 <span class="badge bg-success">
 
 {{$employee->manager->firstname}}
-
+@if($employee->manager->middlename){{$employee->manager->middlename}} @endif
 {{$employee->manager->surname}}
 
 </span>
@@ -441,7 +446,7 @@ selected
 >
 
 {{$manager->firstname}}
-
+@if($manager->middlename){{$manager->middlename}} @endif
 {{$manager->surname}}
 
 </option>

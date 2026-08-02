@@ -6,8 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
-
-
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
@@ -63,7 +62,7 @@ public function store(Request $request)
 
     Task::create([
 
-'created_by'=>session('user_id'),
+'created_by'=>Auth::id(),
 
 'assigned_to'=>$request->assigned_to,
 

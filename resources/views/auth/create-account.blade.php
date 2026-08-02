@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Create Account</title>
-
+<link rel="icon" type="image/ico" href="{{ asset('favicon.ico') }}">
 
 <style>
 
@@ -282,27 +282,65 @@ body::after{
 
 
 
+/* Hide the native placeholder text/glyph but keep the element functional
+   so we can key off :placeholder-shown for text inputs */
 
-/* Float the label up and shrink it when focused OR when the field has a valid value */
+.form-group input::placeholder{
 
-.form-group input:focus + label,
-.form-group input:valid + label,
-.form-group select:focus + label,
-.form-group select:valid + label{
-
-
-    text-align: center;
-
-    font-size:15px;
-
-    color:#777;
-
-    font-family: 'Segoe UI', sans-serif;
+    opacity:0;
 
 }
 
 
-/* Autofilled fields (Chrome) don't always trigger :valid the same way, so cover them too */
+
+/* Float the label up and shrink it when focused, OR when the field
+   actually has content (::placeholder-shown covers "empty vs not")  */
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label{
+
+    top:-10px;
+
+    left:12px;
+
+    font-size:12px;
+
+    color:#667eea;
+
+    background:#fff;
+
+    padding:0 4px;
+
+}
+
+
+
+/* Selects don't support :placeholder-shown, so float the label on
+   focus or once a real (non-empty) option is chosen via :valid.
+   The blank "Select Role" option below is marked disabled so the
+   select is :invalid until a real option is picked. */
+
+.form-group select:focus + label,
+.form-group select:valid + label{
+
+    top:-10px;
+
+    left:12px;
+
+    font-size:12px;
+
+    color:#667eea;
+
+    background:#fff;
+
+    padding:0 4px;
+
+}
+
+
+
+/* Autofilled fields (Chrome) don't always trigger the above the same
+   way, so cover them too */
 
 .form-group input:-webkit-autofill + label{
 
@@ -321,12 +359,62 @@ body::after{
 
 
 
-.form-group select{
+/* Role select: strip native appearance, add a custom chevron, and match
+   the input styling exactly (same padding, radius, focus ring, etc.) */
 
+.form-group select#role{
+
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+
+    color:#333;
+
+    padding-right:40px;
 
     cursor:pointer;
 
+    background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'><path d='M1 1l6 6 6-6' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+
+    background-repeat:no-repeat;
+
+    background-position:right 16px center;
+
+    background-size:14px 8px;
+
 }
+
+
+.form-group select#role option{
+
+    color:#333;
+
+}
+
+
+.form-group select#role option[value=""]{
+
+    color:#999;
+
+}
+
+
+.form-group select#role:focus{
+
+    background-color:#fff;
+
+    background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'><path d='M1 1l6 6 6-6' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+
+    background-repeat:no-repeat;
+
+    background-position:right 16px center;
+
+    background-size:14px 8px;
+
+}
+
 
 
 
@@ -382,8 +470,6 @@ body::after{
     text-decoration:none;
 
 }
-
-
 
 
 
@@ -468,8 +554,6 @@ button:hover{
     text-decoration:underline;
 
 }
-
-
 
 
 @keyframes slide{
@@ -592,6 +676,7 @@ to{
 type="text"
 id="firstname"
 name="firstname"
+placeholder=" "
 value="{{ old('firstname') }}"
 required>
 
@@ -612,6 +697,7 @@ required>
 type="text"
 id="middlename"
 name="middlename"
+placeholder=" "
 value="{{ old('middlename') }}">
 
 <label for="middlename">Middle Name</label>
@@ -631,6 +717,7 @@ value="{{ old('middlename') }}">
 type="text"
 id="surname"
 name="surname"
+placeholder=" "
 value="{{ old('surname') }}"
 required>
 
@@ -651,6 +738,7 @@ required>
 type="email"
 id="email"
 name="email"
+placeholder=" "
 value="{{ old('email') }}"
 required>
 
@@ -671,6 +759,7 @@ required>
 type="text"
 id="phone_no"
 name="phone_no"
+placeholder=" "
 value="{{ old('phone_no') }}"
 required>
 
@@ -691,6 +780,7 @@ required>
 type="password"
 id="password"
 name="password"
+placeholder=" "
 required>
 
 <label for="password">Password</label>
@@ -710,9 +800,14 @@ required>
 type="password"
 id="password_confirmation"
 name="password_confirmation"
+placeholder=" "
 required>
 
 <label for="password_confirmation">Confirm Password</label>
+
+<span class="error" id="password-match-error" style="display:none;">
+Passwords do not match
+</span>
 
 </div>
 
@@ -723,20 +818,8 @@ required>
 
 <select name="role" id="role" required>
 
-<option value="">
+<option value="" disabled selected>
 Select Role
-</option>
-
-
-<option value="user"
-{{ old('role') == 'user' ? 'selected' : '' }}>
-User
-</option>
-
-
-<option value="manager"
-{{ old('role') == 'manager' ? 'selected' : '' }}>
-Manager
 </option>
 
 
@@ -746,7 +829,21 @@ Admin
 </option>
 
 
+<option value="manager"
+{{ old('role') == 'manager' ? 'selected' : '' }}>
+Manager
+</option>
+
+
+<option value="user"
+{{ old('role') == 'user' ? 'selected' : '' }}>
+Member
+</option>
+
+
 </select>
+
+<label for="role"></label>
 
 
 @error('role')
@@ -815,6 +912,50 @@ Already have an account?
 
 
 </div>
+
+
+
+<script>
+
+const passwordInput = document.getElementById('password');
+const confirmInput = document.getElementById('password_confirmation');
+const matchError = document.getElementById('password-match-error');
+const form = document.querySelector('form');
+
+function checkPasswordsMatch(){
+
+    if(confirmInput.value && passwordInput.value !== confirmInput.value){
+
+        matchError.style.display = 'block';
+        confirmInput.style.boxShadow = '0 0 0 2px #e63946';
+
+        return false;
+
+    } else {
+
+        matchError.style.display = 'none';
+        confirmInput.style.boxShadow = '';
+
+        return true;
+
+    }
+
+}
+
+passwordInput.addEventListener('input', checkPasswordsMatch);
+confirmInput.addEventListener('input', checkPasswordsMatch);
+
+form.addEventListener('submit', function(e){
+
+    if(!checkPasswordsMatch()){
+
+        e.preventDefault();
+
+    }
+
+});
+
+</script>
 
 
 
