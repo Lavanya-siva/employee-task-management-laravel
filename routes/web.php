@@ -10,6 +10,7 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,14 @@ Route::get('/create-account', [AuthController::class, 'createAccount'])->name('c
 Route::get('/otp-verify', [AuthController::class, 'otpVerify'])->name('otpVerify');
 Route::get('/resend-otp', [AuthController::class, 'resendOtp'])->name('otpVerify');
 
+
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showForm'])
+    ->middleware('guest')
+    ->name('password.request');
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'update'])
+    ->middleware('guest')
+    ->name('password.update');
 /*
 |--------------------------------------------------------------------------
 | Protected routes (auth required)
