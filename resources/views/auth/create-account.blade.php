@@ -805,6 +805,10 @@ required>
 
 <label for="password_confirmation">Confirm Password</label>
 
+<span class="error" id="password-match-error" style="display:none;">
+Passwords do not match
+</span>
+
 </div>
 
 
@@ -908,6 +912,50 @@ Already have an account?
 
 
 </div>
+
+
+
+<script>
+
+const passwordInput = document.getElementById('password');
+const confirmInput = document.getElementById('password_confirmation');
+const matchError = document.getElementById('password-match-error');
+const form = document.querySelector('form');
+
+function checkPasswordsMatch(){
+
+    if(confirmInput.value && passwordInput.value !== confirmInput.value){
+
+        matchError.style.display = 'block';
+        confirmInput.style.boxShadow = '0 0 0 2px #e63946';
+
+        return false;
+
+    } else {
+
+        matchError.style.display = 'none';
+        confirmInput.style.boxShadow = '';
+
+        return true;
+
+    }
+
+}
+
+passwordInput.addEventListener('input', checkPasswordsMatch);
+confirmInput.addEventListener('input', checkPasswordsMatch);
+
+form.addEventListener('submit', function(e){
+
+    if(!checkPasswordsMatch()){
+
+        e.preventDefault();
+
+    }
+
+});
+
+</script>
 
 
 

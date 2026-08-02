@@ -12,6 +12,17 @@ class TaskControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function asUser(User $user): self
+    {
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $this->withSession([
+            'access_token' => $token,
+        ]);
+
+        return $this;
+    }
+
     #[Test]
     public function task_list_page_loads_with_tasks_and_employees()
     {
@@ -23,7 +34,7 @@ class TaskControllerTest extends TestCase
             'assigned_to' => $employee->id,
         ]);
 
-        $response = $this->get('/tasks');
+        $response = $this->asUser($creator)->get('/tasks');
 
         $response->assertOk();
         $response->assertViewIs('tasks.index');
@@ -38,7 +49,7 @@ class TaskControllerTest extends TestCase
         $manager = User::factory()->create(['role' => 'manager']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->get('/tasks');
+        $response = $this->asUser($admin)->get('/tasks');
 
         $response->assertOk();
         $employees = $response->viewData('employees');
@@ -54,14 +65,13 @@ class TaskControllerTest extends TestCase
         $creator = User::factory()->create(['role' => 'admin']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->withSession(['user_id' => $creator->id])
-            ->post('/tasks', [
-                'title' => 'Fix login bug',
-                'description' => 'Login fails on invalid password',
-                'assigned_to' => $employee->id,
-                'priority' => 'high',
-                'due_date' => now()->addDays(3)->format('Y-m-d'),
-            ]);
+        $response = $this->asUser($creator)->post('/tasks', [
+            'title' => 'Fix login bug',
+            'description' => 'Login fails on invalid password',
+            'assigned_to' => $employee->id,
+            'priority' => 'high',
+            'due_date' => now()->addDays(3)->format('Y-m-d'),
+        ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Task created successfully');
@@ -79,8 +89,7 @@ class TaskControllerTest extends TestCase
     {
         $creator = User::factory()->create(['role' => 'admin']);
 
-        $response = $this->withSession(['user_id' => $creator->id])
-            ->post('/tasks', []);
+        $response = $this->asUser($creator)->post('/tasks', []);
 
         $response->assertSessionHasErrors([
             'title',
@@ -98,13 +107,12 @@ class TaskControllerTest extends TestCase
         $creator = User::factory()->create(['role' => 'admin']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->withSession(['user_id' => $creator->id])
-            ->post('/tasks', [
-                'title' => 'Fix login bug',
-                'assigned_to' => $employee->id,
-                'priority' => 'urgent', // not in low|medium|high
-                'due_date' => now()->addDays(3)->format('Y-m-d'),
-            ]);
+        $response = $this->asUser($creator)->post('/tasks', [
+            'title' => 'Fix login bug',
+            'assigned_to' => $employee->id,
+            'priority' => 'urgent', // not in low|medium|high
+            'due_date' => now()->addDays(3)->format('Y-m-d'),
+        ]);
 
         $response->assertSessionHasErrors(['priority']);
         $this->assertDatabaseCount('tasks', 0);
@@ -115,13 +123,12 @@ class TaskControllerTest extends TestCase
     {
         $creator = User::factory()->create(['role' => 'admin']);
 
-        $response = $this->withSession(['user_id' => $creator->id])
-            ->post('/tasks', [
-                'title' => 'Fix login bug',
-                'assigned_to' => 99999,
-                'priority' => 'high',
-                'due_date' => now()->addDays(3)->format('Y-m-d'),
-            ]);
+        $response = $this->asUser($creator)->post('/tasks', [
+            'title' => 'Fix login bug',
+            'assigned_to' => 99999,
+            'priority' => 'high',
+            'due_date' => now()->addDays(3)->format('Y-m-d'),
+        ]);
 
         $response->assertSessionHasErrors(['assigned_to']);
         $this->assertDatabaseCount('tasks', 0);
@@ -133,13 +140,12 @@ class TaskControllerTest extends TestCase
         $creator = User::factory()->create(['role' => 'admin']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->withSession(['user_id' => $creator->id])
-            ->post('/tasks', [
-                'title' => 'Fix login bug',
-                'assigned_to' => $employee->id,
-                'priority' => 'high',
-                'due_date' => now()->format('Y-m-d'), // today, not "after:today"
-            ]);
+        $response = $this->asUser($creator)->post('/tasks', [
+            'title' => 'Fix login bug',
+            'assigned_to' => $employee->id,
+            'priority' => 'high',
+            'due_date' => now()->format('Y-m-d'), // today, not "after:today"
+        ]);
 
         $response->assertSessionHasErrors(['due_date']);
         $this->assertDatabaseCount('tasks', 0);
@@ -151,13 +157,12 @@ class TaskControllerTest extends TestCase
         $creator = User::factory()->create(['role' => 'admin']);
         $employee = User::factory()->create(['role' => 'user']);
 
-        $response = $this->withSession(['user_id' => $creator->id])
-            ->post('/tasks', [
-                'title' => 'No description task',
-                'assigned_to' => $employee->id,
-                'priority' => 'low',
-                'due_date' => now()->addDay()->format('Y-m-d'),
-            ]);
+        $response = $this->asUser($creator)->post('/tasks', [
+            'title' => 'No description task',
+            'assigned_to' => $employee->id,
+            'priority' => 'low',
+            'due_date' => now()->addDay()->format('Y-m-d'),
+        ]);
 
         $response->assertSessionHasNoErrors();
         $this->assertDatabaseHas('tasks', [
@@ -178,7 +183,7 @@ class TaskControllerTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->post("/tasks/{$task->id}/status", [
+        $response = $this->asUser($creator)->post("/tasks/{$task->id}/status", [
             'status' => 'completed',
         ]);
 
@@ -202,7 +207,7 @@ class TaskControllerTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $response = $this->post("/tasks/{$task->id}/status", []);
+        $response = $this->asUser($creator)->post("/tasks/{$task->id}/status", []);
 
         $response->assertSessionHasErrors(['status']);
 
